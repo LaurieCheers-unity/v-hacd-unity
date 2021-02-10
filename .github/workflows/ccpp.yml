@@ -34,7 +34,7 @@ jobs:
         cd build
         cmake -G "${{ matrix.cmake_type }}" ../src
     - name: build
-      run: cmake --build build --config Debug
+      run: cmake --build build --config Release
 
     - uses: actions/upload-artifact@v1
       with:
