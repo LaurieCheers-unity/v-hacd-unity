@@ -11,7 +11,7 @@ jobs:
         include:
           - platform: windows-latest
             cmake_type: "Visual Studio 16 2019"
-            dll_name: "Debug/libvhacd.dll"
+            dll_name: "Release/libvhacd.dll"
             target_dll_name: "libvhacd.dll"
           - platform: ubuntu-latest
             cmake_type: "Unix Makefiles"
@@ -26,7 +26,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - uses: ilammy/msvc-dev-cmd@v1.0.0
+    - uses: ilammy/msvc-dev-cmd@v1.5.0
       
     - name: configure
       run: |
@@ -34,7 +34,7 @@ jobs:
         cd build
         cmake -G "${{ matrix.cmake_type }}" ../src
     - name: build
-      run: cmake --build build --config Debug
+      run: cmake --build build --config Release
 
     - uses: actions/upload-artifact@v1
       with:
@@ -71,34 +71,3 @@ jobs:
       with:
           name: macos-latest
       
-    - uses: pCYSl5EDgo/setup-unity@master
-      with:
-        unity-version: 2019.2.13f1
-
-    - name: create unitypackage
-      run: |
-        mkdir build
-        mkdir build/VHACD
-        cp ubuntu-latest/liblibvhacd.so build/VHACD/liblibvhacd.so
-        cp macos-latest/liblibvhacd.dylib build/VHACD/liblibvhacd.dylib
-        cp windows-latest/libvhacd.dll build/VHACD/libvhacd.dll
-        cp src/dll/VHACD.cs build/VHACD/VHACD.cs
-        cp src/dll/vhacd.asmdef build/VHACD/vhacd.asmdef
-        cp src/dll/vhacd.asmdef.meta build/VHACD/vhacd.asmdef.meta
-        cp src/dll/liblibvhacd.so.meta build/VHACD/liblibvhacd.so.meta
-        cp src/dll/liblibvhacd.dylib.meta build/VHACD/liblibvhacd.dylib.meta
-        cp src/dll/libvhacd.dll.meta build/VHACD/libvhacd.dll.meta
-        cd build
-        /opt/Unity/Editor/Unity -quit -batchMode -logFile -noGraphics -force-free -createProject unity_project
-        mv VHACD unity_project/VHACD
-        /opt/Unity/Editor/Unity -quit -batchMode -logFile -noGraphics -force-free -projectPath unity_project -exportPackage VHACD VHACD.unitypackage
-
-    - name: upload unitypackage
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build/VHACD.unitypackage
-        asset_name: VHACD.unitypackage
-        asset_content_type: application/octet-stream
